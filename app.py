@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 # --- 1. OLDAL BEÁLLÍTÁSOK ---
-st.set_page_config(page_title="Urológiai Nomogram", layout="wide")
+st.set_page_config(page_title="Uoflowmetria kiértékelés", layout="wide")
 
 # --- STÍLUS (CSS - Modern Design) ---
 st.markdown("""
@@ -77,8 +77,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- CÍMSOR ---
-st.title("Urológiai Diagnosztika")
-st.markdown("### Unified Nomogram App")
+st.title("Uroflow kiértékelés")
+st.markdown("")
 
 with st.expander("Jogi Nyilatkozat (Kattints a megnyitáshoz)"):
     st.warning("""
@@ -110,7 +110,7 @@ def plot_patient_point(ax, x, y):
 # ==========================================
 def liverpool_nomogram():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.info("Férfiak (50 év alatt). Általános áramlásvizsgálat (Haylen et al.).")
+    st.info("Férfiak (50 év alatt) áramlása")
 
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
@@ -190,7 +190,7 @@ def liverpool_nomogram():
 # ==========================================
 def miskolc_nomogram():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.info("Fiú gyermekek. Részletes percentilis becslés (Szabó & Fegyverneki, 1995).")
+    st.info("Fiú gyermekek áramlása.")
 
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
@@ -287,7 +287,7 @@ def miskolc_nomogram():
 # ==========================================
 def toguri_nomogram():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.warning("Figyelem: Ez a nomogram kifejezetten az alacsony áramlás (obstrukció) szűrésére készült (Toguri et al., 1982).")
+    st.warning("Fiú gyermekek áramlása.")
 
     c1, c2, c3 = st.columns([1, 1, 2])
     with c1:
