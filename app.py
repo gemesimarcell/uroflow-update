@@ -9,24 +9,28 @@ st.set_page_config(page_title="Uroflowmetria kiértékelés", layout="wide")
 # --- STÍLUS (CSS - Modern Design) ---
 st.markdown("""
     <style>
-    /* Fő háttér és betűtípus */
+    /* Fő háttér */
     .main {
-        background-color: #f8f9fa;
+        background-color: #f4f7f9; /* Kicsit hűvösebb, modernebb szürke */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     /* Címsorok */
-    h1 { color: #2c3e50; font-weight: 700; letter-spacing: -0.5px; }
-    h3 { color: #7f8c8d; font-weight: 400; margin-bottom: 20px; }
+    h1 { color: #1e3a8a; font-weight: 800; letter-spacing: -0.5px; }
+    h3 { color: #64748b; font-weight: 500; margin-bottom: 20px; }
 
-    /* Kártya dobozok (fehér háttér, árnyék) */
+    /* KÁRTYA DOBOZOK (A fehér blokkok újragondolva) */
     .card {
-        background-color: white;
+        background-color: #ffffff;
         padding: 25px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        /* Egy szép kék felső csík, hogy "menőbb" legyen */
+        border-top: 5px solid #3498db; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Mélyebb árnyék */
         margin-bottom: 25px;
-        border: 1px solid #edf2f7;
+        border-left: 1px solid #edf2f7;
+        border-right: 1px solid #edf2f7;
+        border-bottom: 1px solid #edf2f7;
     }
 
     /* Gombok stílusa */
@@ -47,32 +51,48 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
     }
 
-    /* Eredmény dobozok */
+    /* Eredmény dobozok - Halvány kékesszürke háttérrel */
     .result-box {
         padding: 15px 20px;
-        background: #ffffff;
+        background: #f8faff; /* Nem sima fehér, hanem modern halványkék */
         border-radius: 10px;
-        border-left: 5px solid #bdc3c7; /* Alapértelmezett szürke */
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        border-left: 5px solid #bdc3c7; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         margin-bottom: 10px;
     }
     
     .metric-label {
         font-size: 0.85em;
-        color: #95a5a6;
+        color: #7f8c8d;
         text-transform: uppercase;
         letter-spacing: 1px;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 4px;
     }
     .metric-value {
         font-size: 1.4em;
-        font-weight: 700;
+        font-weight: 800;
         color: #2c3e50;
     }
     
-    /* Figyelmeztetések eltüntetése a plotok körül */
+    /* Grafikonok kerete */
     canvas { border-radius: 8px; }
+    
+    /* Fülek (Tabs) stílusa */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 20px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #ebf5fb; /* Halványkék háttér az aktív fülnek */
+        border-color: #3498db;
+        color: #2980b9;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -280,7 +300,6 @@ def miskolc_nomogram():
             plot_miskolc_curves(axm2, "Qave Nomogram", *p_curr['ave'], qave, 30)
             st.pyplot(figm2)
         st.markdown('</div>', unsafe_allow_html=True)
-
 
 # ==========================================
 # 3. TOGURI NOMOGRAM (NINCS GRAFIKON)
