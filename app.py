@@ -6,12 +6,12 @@ import math
 # --- 1. OLDAL KONFIGURÁCIÓ ---
 st.set_page_config(page_title="Uroflowmetria", layout="wide")
 
-# --- PRÉMIUM CSS DIZÁJN ---
+# --- PRÉMIUM CSS DIZÁJN (JAVÍTVA) ---
 st.markdown("""
     <style>
-    /* Fő háttér */
+    /* Fő háttér: Nagyon világos, tiszta szürke */
     .stApp {
-        background-color: #F2F2F7; /* iOS System Gray 6 */
+        background-color: #F9F9F9; 
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -37,7 +37,7 @@ st.markdown("""
         background-color: #FFFFFF;
         border-radius: 18px;
         padding: 25px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Enyhén kék árnyék */
         margin-bottom: 20px;
     }
 
@@ -69,7 +69,7 @@ st.markdown("""
 
     /* Eredmény Widgetek */
     .metric-container {
-        background-color: #F2F2F7;
+        background-color: #F0F0F5; /* Halvány szürke háttér az eredményeknek */
         border-radius: 14px;
         padding: 15px;
         text-align: center;
@@ -91,7 +91,7 @@ st.markdown("""
         line-height: 1.4;
     }
 
-    /* Fülek (Tabs) */
+    /* Fülek (Tabs) - JAVÍTVA: Mindig kontrasztosak */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: transparent;
@@ -102,16 +102,16 @@ st.markdown("""
         height: 40px;
         background-color: #FFFFFF;
         border-radius: 20px;
-        border: none;
-        color: #8E8E93;
+        border: 1px solid #E5E5EA; /* Vékony, látható keret */
+        color: #636366; /* Sötétszürke szöveg */
         font-weight: 600;
         padding: 0 20px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #007AFF;
-        color: #FFFFFF;
+        background-color: #007AFF; /* Aktív: Kék háttér */
+        color: #FFFFFF; /* Aktív: Fehér szöveg */
     }
 
     /* Expander */
@@ -181,7 +181,7 @@ def result_card(label, value, color):
 # ==========================================
 def liverpool_nomogram():
     st.markdown('<div class="ios-card">', unsafe_allow_html=True)
-    st.markdown("#### 👨🏻 Férfiak (50 év alatt)")
+    st.markdown("#### Férfiak (50 év alatt)")
     st.caption("Referencia: Haylen et al.")
     st.markdown("---")
 
@@ -226,7 +226,7 @@ def liverpool_nomogram():
         g1, g2 = st.columns(2)
         
         x_vals = np.linspace(50, 600, 100)
-        # Színpaletta (Kék árnyalatok)
+        # Színpaletta 
         colors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#34C759', '#34C759', '#007AFF']
 
         with g1:
@@ -400,7 +400,7 @@ with tabs[2]:
 
 # --- LÁBLÉC ---
 st.markdown("---")
-st.markdown("""
+st.markdown(f"""
 <div style="text-align: center; color: #8E8E93; font-size: 0.8rem; margin-top: 20px;">
     © 2025 <b>Gémesi Marcell</b> | Minden jog fenntartva.<br>
     Klinikai döntéstámogató segédeszköz.
