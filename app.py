@@ -4,132 +4,136 @@ import numpy as np
 import math
 
 # --- 1. OLDAL KONFIGURÁCIÓ ---
-st.set_page_config(page_title="Uroflowmetria", layout="wide")
+st.set_page_config(page_title="Urológiai Nomogram", layout="wide")
 
-# --- PRÉMIUM CSS DIZÁJN (JAVÍTVA) ---
+# --- PRÉMIUM DARK CSS DIZÁJN ---
 st.markdown("""
     <style>
-    /* Fő háttér: Nagyon világos, tiszta szürke */
+    /* SÖTÉT HÁTTÉR */
     .stApp {
-        background-color: #F9F9F9; 
+        background-color: #2C3E50; /* Sötétkék/Szürke háttér */
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-
-    /* Fejléc eltüntetése/formázása */
-    header {visibility: hidden;}
     
+    /* FŐ CÍMSOROK (Fehérre állítva a sötét háttér miatt) */
     h1 {
-        color: #1C1C1E;
-        font-weight: 700;
+        color: #ECF0F1 !important;
+        font-weight: 800;
         letter-spacing: -0.5px;
-        padding-top: 20px;
+        padding-top: 10px;
     }
     
     h3 {
-        color: #8E8E93;
-        font-weight: 500;
-        font-size: 1.1rem;
+        color: #BDC3C7 !important;
+        font-weight: 400;
+        font-size: 1.2rem;
         padding-bottom: 20px;
     }
-
-    /* Kártya konténer stílus */
+    
+    /* KÁRTYA DOBOZOK (Fehér szigetek a sötét tengerben) */
     .ios-card {
         background-color: #FFFFFF;
-        border-radius: 18px;
+        border-radius: 16px;
         padding: 25px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Enyhén kék árnyék */
-        margin-bottom: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3); /* Erősebb árnyék */
+        margin-bottom: 25px;
     }
 
-    /* Beviteli mezők */
+    /* Beviteli mezők címkéi (A kártyán belül sötétek) */
     .stNumberInput > label {
+        color: #2C3E50 !important;
         font-weight: 600;
-        color: #3A3A3C;
-        font-size: 0.9rem;
     }
     
-    /* Gomb stílus - iOS Blue */
+    /* Gomb stílus */
     .stButton > button {
-        background-color: #007AFF;
+        background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
         color: white;
-        border-radius: 12px;
+        border-radius: 10px;
         border: none;
-        height: 45px;
+        height: 50px;
         font-weight: 600;
         font-size: 16px;
         width: 100%;
-        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        transition: transform 0.2s;
     }
     
     .stButton > button:hover {
-        background-color: #0062CC;
-        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-        transform: scale(1.01);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #5DADE2 0%, #3498DB 100%);
     }
 
     /* Eredmény Widgetek */
     .metric-container {
-        background-color: #F0F0F5; /* Halvány szürke háttér az eredményeknek */
-        border-radius: 14px;
+        background-color: #F8F9FA;
+        border-radius: 12px;
         padding: 15px;
         text-align: center;
-        border: 1px solid #E5E5EA;
+        border: 1px solid #E9ECEF;
     }
     
     .metric-label {
-        color: #8E8E93;
-        font-size: 0.8rem;
+        color: #7F8C8D;
+        font-size: 0.85rem;
         text-transform: uppercase;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 1px;
         margin-bottom: 5px;
     }
     
     .metric-value {
-        color: #1C1C1E;
-        font-size: 1.2rem;
-        font-weight: 700;
-        line-height: 1.4;
+        color: #2C3E50;
+        font-size: 1.4rem;
+        font-weight: 800;
     }
 
-    /* Fülek (Tabs) - JAVÍTVA: Mindig kontrasztosak */
+    /* Fülek (Tabs) Dizájn */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 10px;
         background-color: transparent;
         padding-bottom: 10px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        background-color: #FFFFFF;
-        border-radius: 20px;
-        border: 1px solid #E5E5EA; /* Vékony, látható keret */
-        color: #636366; /* Sötétszürke szöveg */
+        height: 45px;
+        background-color: rgba(255, 255, 255, 0.1); /* Áttetsző fehér */
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #ECF0F1; /* Világos szöveg inaktív állapotban */
         font-weight: 600;
-        padding: 0 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        padding: 0 25px;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #007AFF; /* Aktív: Kék háttér */
-        color: #FFFFFF; /* Aktív: Fehér szöveg */
+        background-color: #3498DB; /* Aktív kék */
+        color: #FFFFFF;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-
+    
     /* Expander */
-    .streamlit-expanderHeader {
-        background-color: #FFFFFF;
-        border-radius: 12px;
-        font-weight: 600;
-        color: #1C1C1E;
+    div[data-testid="stExpander"] {
+        background-color: #34495E;
+        color: white;
+        border: none;
+        border-radius: 10px;
+    }
+    div[data-testid="stExpander"] p {
+        color: #ECF0F1;
+    }
+    div[data-testid="stExpander"] summary {
+        color: #ECF0F1 !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # --- FEJLÉC ---
 st.title("Urológiai Diagnosztika")
-st.markdown("### Klinikai Nomogramok")
+st.markdown("### Unified Nomogram App")
 
 with st.expander("Jogi Nyilatkozat"):
-    st.caption("""
+    st.info("""
     Ez az alkalmazás kizárólag tájékoztató jellegű. A számítások szakirodalmi adatokon alapulnak (Liverpool, Miskolc, Toguri), 
     de nem helyettesítik a szakorvosi diagnózist. A döntéshozatal a kezelőorvos felelőssége.
     """)
@@ -137,40 +141,38 @@ with st.expander("Jogi Nyilatkozat"):
 # --- SEGÉDFÜGGVÉNYEK ---
 def create_clean_plot(title, xlabel, ylabel, x_max, y_max):
     fig, ax = plt.subplots(figsize=(8, 5))
-    # Teljesen tiszta stílus
+    # Tiszta stílus
     fig.patch.set_facecolor('white')
     ax.set_facecolor('white')
     
-    # Keretek eltüntetése
+    # Keretek
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#C7C7CC')
-    ax.spines['bottom'].set_color('#C7C7CC')
+    ax.spines['left'].set_color('#95A5A6')
+    ax.spines['bottom'].set_color('#95A5A6')
     
     # Címkék
-    ax.set_title(title, fontsize=12, fontweight='bold', pad=15, color='#1C1C1E', loc='left')
-    ax.set_xlabel(xlabel, fontsize=10, color='#8E8E93')
-    ax.set_ylabel(ylabel, fontsize=10, color='#8E8E93')
+    ax.set_title(title, fontsize=12, fontweight='bold', pad=15, color='#2C3E50', loc='left')
+    ax.set_xlabel(xlabel, fontsize=10, color='#7F8C8D')
+    ax.set_ylabel(ylabel, fontsize=10, color='#7F8C8D')
     
     # Tengelyek
     ax.set_xlim(0, x_max)
     ax.set_ylim(0, y_max)
-    ax.tick_params(axis='both', colors='#8E8E93')
+    ax.tick_params(axis='both', colors='#7F8C8D')
     
     # Rács
-    ax.grid(True, axis='y', linestyle=':', linewidth=0.5, color='#E5E5EA')
+    ax.grid(True, axis='y', linestyle=':', linewidth=0.5, color='#BDC3C7')
     
     return fig, ax
 
 def plot_patient_point(ax, x, y):
-    # Páciens pontja
-    ax.scatter(x, y, color='#FF3B30', s=100, zorder=10, marker='o', edgecolors='white', linewidth=2, label='Mért érték')
-    ax.legend(loc='upper left', frameon=False, labelcolor='#8E8E93', fontsize=9)
+    ax.scatter(x, y, color='#E74C3C', s=120, zorder=10, marker='o', edgecolors='white', linewidth=2, label='Mért érték')
+    ax.legend(loc='upper left', frameon=False, labelcolor='#7F8C8D', fontsize=9)
 
 def result_card(label, value, color):
-    # HTML komponens a szép eredménykártyához
     st.markdown(f"""
-    <div class="metric-container" style="border-left: 4px solid {color};">
+    <div class="metric-container" style="border-left: 5px solid {color};">
         <div class="metric-label">{label}</div>
         <div class="metric-value" style="color: {color};">{value}</div>
     </div>
@@ -196,12 +198,12 @@ def liverpool_nomogram():
     if vol > 0:
         # Számítás
         def get_liverpool_band(val, limits):
-            # Színek: Piros (#FF3B30), Narancs (#FF9500), Zöld (#34C759), Kék (#007AFF)
-            if val < limits[0]: return "< 5. percentilis (Kóros)", "#FF3B30"
-            if val < limits[1]: return "5-10. percentilis (Alacsony)", "#FF9500"
-            if val < limits[2]: return "10-25. percentilis (Mérsékelt)", "#FFCC00"
-            if val < limits[6]: return "25-95. percentilis (Normál)", "#34C759"
-            return "> 95. percentilis (Magas)", "#007AFF"
+            # Színek: Piros, Narancs, Sárga, Zöld, Kék
+            if val < limits[0]: return "< 5. percentilis (Kóros)", "#E74C3C"
+            if val < limits[1]: return "5-10. percentilis (Alacsony)", "#E67E22"
+            if val < limits[2]: return "10-25. percentilis (Mérsékelt)", "#F1C40F"
+            if val < limits[6]: return "25-95. percentilis (Normál)", "#27AE60"
+            return "> 95. percentilis (Magas)", "#2980B9"
 
         qmax_limits = [0.75, 0.95, 1.20, 1.50, 1.80, 2.10, 2.35]
         qave_limits = [0.45, 0.55, 0.70, 0.875, 1.05, 1.20, 1.30]
@@ -226,8 +228,7 @@ def liverpool_nomogram():
         g1, g2 = st.columns(2)
         
         x_vals = np.linspace(50, 600, 100)
-        # Színpaletta 
-        colors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#34C759', '#34C759', '#007AFF']
+        colors = ['#E74C3C', '#E67E22', '#F1C40F', '#27AE60', '#27AE60', '#27AE60', '#2980B9']
 
         with g1:
             fig1, ax1 = create_clean_plot("Liverpool Qmax", "Térfogat (ml)", "Qmax (ml/s)", 600, 40)
@@ -254,14 +255,13 @@ def liverpool_nomogram():
 # ==========================================
 def miskolc_nomogram():
     st.markdown('<div class="ios-card">', unsafe_allow_html=True)
-    st.markdown("#### 👦🏻 Fiú Gyermekek")
+    st.markdown("#### Fiú Gyermekek")
     st.caption("Referencia: Szabó & Fegyverneki (1995)")
     st.markdown("---")
 
     c1, c2, c3 = st.columns([1, 1, 1])
     with c1:
         vol = st.number_input("Ürített térfogat (ml)", min_value=0.0, value=150.0, step=10.0, key="m_v")
-        # BSA választó egyszerűsítve
         bsa_opts = {1: "< 0.92 m² (Kicsi)", 2: "0.92 - 1.42 m² (Közepes)", 3: "> 1.42 m² (Nagy)"}
         bsa_sel = st.selectbox("Testfelszín (BSA)", options=[1, 2, 3], format_func=lambda x: bsa_opts[x])
     with c2:
@@ -285,11 +285,11 @@ def miskolc_nomogram():
             sd = (L95 - L5) / 3.29
             z = (val - mean) / sd
             
-            if z < -1.645: return "< 5. percentilis (Kóros)", "#FF3B30"
-            if z < -1.28: return "5-10. percentilis (Alacsony)", "#FF9500"
-            if z < -0.675: return "10-25. percentilis (Mérsékelt)", "#FFCC00"
-            if z < 1.645: return "25-95. percentilis (Normál)", "#34C759"
-            return "> 95. percentilis (Magas)", "#007AFF"
+            if z < -1.645: return "< 5. percentilis (Kóros)", "#E74C3C"
+            if z < -1.28: return "5-10. percentilis (Alacsony)", "#E67E22"
+            if z < -0.675: return "10-25. percentilis (Mérsékelt)", "#F1C40F"
+            if z < 1.645: return "25-95. percentilis (Normál)", "#27AE60"
+            return "> 95. percentilis (Magas)", "#2980B9"
 
         txt_max, col_max = calc_miskolc_percentile(qmax, *p_curr['max'])
         txt_ave, col_ave = calc_miskolc_percentile(qave, *p_curr['ave'])
@@ -308,10 +308,10 @@ def miskolc_nomogram():
         mg1, mg2 = st.columns(2)
         x_vals = np.linspace(20, 600, 100)
         ln_x = np.log(x_vals + 1)
-        colors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#34C759', '#34C759', '#007AFF']
+        colors = ['#E74C3C', '#E67E22', '#F1C40F', '#27AE60', '#27AE60', '#27AE60', '#2980B9']
 
         def plot_miskolc_curves(ax, title, A5, B5, A95, B95, patient_y, y_limit):
-            ax.set_title(title, fontsize=12, fontweight='bold', pad=15, color='#1C1C1E', loc='left')
+            ax.set_title(title, fontsize=12, fontweight='bold', pad=15, color='#2C3E50', loc='left')
             ax.set_ylim(0, y_limit)
             z_scores = [-1.645, -1.28, -0.675, 0, 0.675, 1.28, 1.645]
             labels = [5, 10, 25, 50, 75, 90, 95]
@@ -344,7 +344,7 @@ def miskolc_nomogram():
 # ==========================================
 def toguri_nomogram():
     st.markdown('<div class="ios-card">', unsafe_allow_html=True)
-    st.markdown("#### 🔎 Toguri - Obstrukció Szűrés (Fiúk)")
+    st.markdown("#### Toguri - Obstrukció Szűrés (Fiúk)")
     st.warning("Ez a nomogram kifejezetten az alacsony áramlás (obstrukció) szűrésére készült.")
     st.markdown("---")
 
@@ -371,12 +371,12 @@ def toguri_nomogram():
         def evaluate_toguri(val, v_in, table):
             row = next(r for r in table if v_in < r[0])
             thresholds = sorted(row[1:]) 
-            if val < thresholds[0]: return "< 5. percentilis (Kóros)", "#FF3B30"
-            if val < thresholds[1]: return "5-10. percentilis (Nagyon Alacsony)", "#FF9500"
-            if val < thresholds[2]: return "10-15. percentilis (Alacsony)", "#FFCC00"
-            if val < thresholds[3]: return "15-20. percentilis (Alacsony)", "#FFCC00"
+            if val < thresholds[0]: return "< 5. percentilis (Kóros)", "#E74C3C"
+            if val < thresholds[1]: return "5-10. percentilis (Nagyon Alacsony)", "#E67E22"
+            if val < thresholds[2]: return "10-15. percentilis (Alacsony)", "#F1C40F"
+            if val < thresholds[3]: return "15-20. percentilis (Alacsony)", "#F1C40F"
             if val < thresholds[4]: return "20-25. percentilis (Mérsékelt)", "#34C759"
-            return "> 25. percentilis (Normál)", "#007AFF"
+            return "> 25. percentilis (Normál)", "#2980B9"
 
         txt_max, col_max = evaluate_toguri(qmax, vol, curr_max)
         txt_ave, col_ave = evaluate_toguri(qave, vol, curr_ave)
@@ -388,7 +388,7 @@ def toguri_nomogram():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- FÜLEK ---
+# --- MENÜRENDSZER ---
 tabs = st.tabs(["Liverpool", "Miskolc", "Toguri"])
 
 with tabs[0]:
@@ -401,7 +401,7 @@ with tabs[2]:
 # --- LÁBLÉC ---
 st.markdown("---")
 st.markdown(f"""
-<div style="text-align: center; color: #8E8E93; font-size: 0.8rem; margin-top: 20px;">
+<div style="text-align: center; color: #BDC3C7; font-size: 0.8rem; margin-top: 20px; margin-bottom: 20px;">
     © 2025 <b>Gémesi Marcell</b> | Minden jog fenntartva.<br>
     Klinikai döntéstámogató segédeszköz.
 </div>
