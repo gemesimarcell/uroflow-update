@@ -4,29 +4,28 @@ import numpy as np
 import math
 
 # --- 1. OLDAL BEÁLLÍTÁSOK ---
-st.set_page_config(page_title="Uroflowmetria kiértékelés", layout="wide")
+st.set_page_config(page_title="Urológiai Nomogram", layout="wide")
 
-# --- STÍLUS (CSS - Modern Design) ---
+# --- MODERN CSS DIZÁJN ---
 st.markdown("""
     <style>
-    /* Fő háttér */
-    .main {
+    /* Fő háttér és betűtípus */
+    .stApp {
         background-color: #f4f7f9; /* Kicsit hűvösebb, modernebb szürke */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     /* Címsorok */
-    h1 { color: #1e3a8a; font-weight: 800; letter-spacing: -0.5px; }
-    h3 { color: #64748b; font-weight: 500; margin-bottom: 20px; }
+    h1 { color: #1e3a8a; font-weight: 800; letter-spacing: -0.5px; padding-bottom: 10px;}
+    h3 { color: #64748b; font-weight: 500; font-size: 1.1rem; }
 
-    /* KÁRTYA DOBOZOK (A fehér blokkok újragondolva) */
-    .card {
+    /* KÁRTYA DOBOZOK */
+    .css-card {
         background-color: #ffffff;
         padding: 25px;
         border-radius: 12px;
-        /* Egy szép kék felső csík, hogy "menőbb" legyen */
         border-top: 5px solid #3498db; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Mélyebb árnyék */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         margin-bottom: 25px;
         border-left: 1px solid #edf2f7;
         border-right: 1px solid #edf2f7;
@@ -51,10 +50,10 @@ st.markdown("""
         box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
     }
 
-    /* Eredmény dobozok - Halvány kékesszürke háttérrel */
+    /* Eredmény dobozok */
     .result-box {
         padding: 15px 20px;
-        background: #f8faff; /* Nem sima fehér, hanem modern halványkék */
+        background: #f8faff;
         border-radius: 10px;
         border-left: 5px solid #bdc3c7; 
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
@@ -78,29 +77,62 @@ st.markdown("""
     /* Grafikonok kerete */
     canvas { border-radius: 8px; }
     
-    /* Fülek (Tabs) stílusa */
+    /* FÜLEK (TABS) STÍLUSA - JAVÍTVA: MINDIG LÁTHATÓ */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
+        margin-bottom: 20px;
     }
+    
     .stTabs [data-baseweb="tab"] {
         background-color: white;
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         padding: 10px 20px;
+        color: #64748b; /* Szöveg színe alapállapotban */
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Kis árnyék, hogy kiemelkedjen */
     }
+    
+    /* Aktív fül stílusa */
     .stTabs [aria-selected="true"] {
-        background-color: #ebf5fb; /* Halványkék háttér az aktív fülnek */
-        border-color: #3498db;
-        color: #2980b9;
+        background-color: #ebf5fb; /* Halványkék háttér */
+        border-color: #3498db; /* Kék keret */
+        color: #2980b9; /* Kék szöveg */
     }
+
+    /* Hover effekt a fülekre */
+    .stTabs [data-baseweb="tab"]:hover {
+        border-color: #3498db;
+        color: #3498db;
+    }
+    
+    /* Expander (Lenyíló) stílusa - Szürke rész eltüntetése */
+    div[data-testid="stExpander"] {
+        background-color: white;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        margin-bottom: 20px; /* Térköz alatta */
+    }
+    
+    div[data-testid="stExpander"] summary {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    div[data-testid="stExpander"] div[role="button"]:hover {
+        color: #3498db;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
 # --- CÍMSOR ---
-st.title("Uroflow kiértékelés")
-st.markdown("")
+st.title("Urológiai Diagnosztika")
+st.markdown('<h3 style="text-align: center;">Unified Nomogram App</h3>', unsafe_allow_html=True)
 
-with st.expander("Jogi Nyilatkozat (Kattints a megnyitáshoz)"):
+# Jogi nyilatkozat - most már nem hagy szürke sávot
+with st.expander("ℹ️ Jogi Nyilatkozat és Információk"):
     st.warning("""
     Ez az alkalmazás kizárólag tájékoztató jellegű segédeszköz. 
     A számítások a szakirodalomban publikált nomogramokon alapulnak (Liverpool, Miskolc, Toguri), de a klinikai döntéshozatal minden esetben a vizsgáló szakorvos felelőssége.
@@ -110,6 +142,8 @@ with st.expander("Jogi Nyilatkozat (Kattints a megnyitáshoz)"):
 # --- SEGÉDFÜGGVÉNYEK ---
 def create_plot(title, xlabel, ylabel, x_max, y_max):
     fig, ax = plt.subplots(figsize=(8, 5))
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
     # Modern rács és stílus
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -129,10 +163,10 @@ def plot_patient_point(ax, x, y):
 # 1. LIVERPOOL NOMOGRAM
 # ==========================================
 def liverpool_nomogram():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.info("Férfiak (50 év alatt) áramlása")
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.info("💡 **Férfiak (50 év alatt).** Általános áramlásvizsgálat (Haylen et al.).")
 
-    c1, c2, c3 = st.columns([1, 1, 2])
+    c1, c2, c3 = st.columns([1, 1, 1.5])
     with c1:
         vol = st.number_input("Ürített térfogat (ml)", min_value=0.0, value=400.0, step=10.0, key="l_v")
     with c2:
@@ -142,15 +176,14 @@ def liverpool_nomogram():
     if vol > 0:
         # Percentilis logika
         def get_band_text(val, limits):
-            # limits: [5p, 10p, 25p, 50p, 75p, 90p, 95p]
-            if val < limits[0]: return "< 5. percentilis (Kóros)", "#e74c3c" # Piros
-            if val < limits[1]: return "5-10. percentilis (Alacsony)", "#e67e22" # Narancs
-            if val < limits[2]: return "10-25. percentilis (Mérsékelt)", "#f1c40f" # Sárga
-            if val < limits[3]: return "25-50. percentilis (Átlagos)", "#27ae60" # Zöld
+            if val < limits[0]: return "< 5. percentilis (Kóros)", "#e74c3c" 
+            if val < limits[1]: return "5-10. percentilis (Alacsony)", "#f97316" 
+            if val < limits[2]: return "10-25. percentilis (Mérsékelt)", "#f1c40f" 
+            if val < limits[3]: return "25-50. percentilis (Átlagos)", "#27ae60" 
             if val < limits[4]: return "50-75. percentilis (Jó)", "#27ae60"
             if val < limits[5]: return "75-90. percentilis (Kiváló)", "#27ae60"
-            if val < limits[6]: return "90-95. percentilis (Kiemelkedő)", "#2980b9" # Kék
-            return "> 95. percentilis (Magas)", "#2980b9"
+            if val < limits[6]: return "90-95. percentilis (Kiemelkedő)", "#3b82f6" 
+            return "> 95. percentilis (Magas)", "#3b82f6"
 
         qmax_limits = [0.75, 0.95, 1.20, 1.50, 1.80, 2.10, 2.35]
         qave_limits = [0.45, 0.55, 0.70, 0.875, 1.05, 1.20, 1.30]
@@ -161,7 +194,6 @@ def liverpool_nomogram():
         txt_max, col_max = get_band_text(res_qmax_val, qmax_limits)
         txt_ave, col_ave = get_band_text(res_qave_val, qave_limits)
 
-        # Eredmény megjelenítés
         with c3:
             st.markdown(f"""
             <div class="result-box" style="border-left-color: {col_max};">
@@ -177,12 +209,12 @@ def liverpool_nomogram():
 
     # Grafikonok
     if vol > 0:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown('<div class="css-card">', unsafe_allow_html=True)
         st.subheader("Grafikus ábrázolás")
         g1, g2 = st.columns(2)
         x_vals = np.linspace(50, 600, 100)
         # Színek a görbékhez
-        curve_colors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60', '#3498db', '#2980b9']
+        curve_colors = ['#e74c3c', '#f97316', '#f1c40f', '#27ae60', '#27ae60', '#27ae60', '#3b82f6']
         
         with g1:
             fig1, ax1 = create_plot("Liverpool Qmax", "Térfogat (ml)", "Qmax (ml/s)", 600, 40)
@@ -209,10 +241,10 @@ def liverpool_nomogram():
 # 2. MISKOLC NOMOGRAM
 # ==========================================
 def miskolc_nomogram():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.info("Fiú gyermekek áramlása.")
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.info("💡 **Fiú gyermekek.** Részletes percentilis becslés (Szabó & Fegyverneki, 1995).")
 
-    c1, c2, c3 = st.columns([1, 1, 2])
+    c1, c2, c3 = st.columns([1, 1, 1.5])
     with c1:
         vol = st.number_input("Ürített térfogat (ml)", min_value=0.0, value=150.0, step=10.0, key="m_v")
         bsa_sel = st.selectbox("Testfelszín (BSA)", options=[1, 2, 3], 
@@ -239,13 +271,13 @@ def miskolc_nomogram():
             z = (val - mean) / sd
             
             if z < -1.645: return "< 5. percentilis (Kóros)", "#e74c3c"
-            if z < -1.28: return "5-10. percentilis (Alacsony)", "#e67e22"
+            if z < -1.28: return "5-10. percentilis (Alacsony)", "#f97316"
             if z < -0.675: return "10-25. percentilis (Mérsékelt)", "#f1c40f"
             if z < 0: return "25-50. percentilis (Átlagos)", "#27ae60"
             if z < 0.675: return "50-75. percentilis (Jó)", "#27ae60"
             if z < 1.28: return "75-90. percentilis (Kiváló)", "#27ae60"
-            if z < 1.645: return "90-95. percentilis (Kiemelkedő)", "#2980b9"
-            return "> 95. percentilis (Magas)", "#2980b9"
+            if z < 1.645: return "90-95. percentilis (Kiemelkedő)", "#3b82f6"
+            return "> 95. percentilis (Magas)", "#3b82f6"
 
         txt_max, col_max = calc_miskolc_percentile(qmax, *p_curr['max'])
         txt_ave, col_ave = calc_miskolc_percentile(qave, *p_curr['ave'])
@@ -265,12 +297,12 @@ def miskolc_nomogram():
 
     # Grafikonok
     if vol > 0:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown('<div class="css-card">', unsafe_allow_html=True)
         st.subheader("Grafikus ábrázolás")
         mg1, mg2 = st.columns(2)
         x_vals = np.linspace(20, 600, 100)
         ln_x = np.log(x_vals + 1)
-        curve_colors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60', '#3498db', '#2980b9']
+        curve_colors = ['#e74c3c', '#f97316', '#f1c40f', '#27ae60', '#27ae60', '#27ae60', '#3b82f6']
 
         def plot_miskolc_curves(ax, title, A5, B5, A95, B95, patient_y, y_limit):
             ax.set_title(title, fontsize=12, fontweight='bold', pad=15, color='#34495e')
@@ -305,10 +337,10 @@ def miskolc_nomogram():
 # 3. TOGURI NOMOGRAM (NINCS GRAFIKON)
 # ==========================================
 def toguri_nomogram():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.warning("Fiú gyermekek áramlása.")
+    st.markdown('<div class="css-card">', unsafe_allow_html=True)
+    st.warning("⚠️ **Figyelem:** Ez a nomogram kifejezetten az alacsony áramlás (obstrukció) szűrésére készült (Toguri et al., 1982).")
 
-    c1, c2, c3 = st.columns([1, 1, 2])
+    c1, c2, c3 = st.columns([1, 1, 1.5])
     with c1:
         vol = st.number_input("Ürített térfogat (ml)", min_value=0.0, value=140.0, step=10.0, key="t_v")
         bsa_sel = st.selectbox("Testfelszín (BSA)", options=[0, 1], 
