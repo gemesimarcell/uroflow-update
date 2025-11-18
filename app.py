@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 # --- 1. OLDAL BEÁLLÍTÁSOK ---
-st.set_page_config(page_title="Uoflowmetria kiértékelés", layout="wide")
+st.set_page_config(page_title="Uroflowmetria kiértékelés", layout="wide")
 
 # --- STÍLUS (CSS - Modern Design) ---
 st.markdown("""
